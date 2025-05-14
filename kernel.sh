@@ -75,3 +75,24 @@ _os_version() {
     MAIN_VER="$(printf "%s" "$OS_INFO" | grep -oE "[0-9.]+")"
     printf -- "%s" "${MAIN_VER%%.*}"
 }
+
+detect_virt() {
+    local VIRT
+    if _exists "virt-what"; then
+        VIRT="$(virt-what)"
+    elif _exists "systemd-detect-virt"; then
+        VIRT="$(systemd-detect-virt)"
+    else
+        error_and_exit 'No virtualization detection tool found.'
+    fi
+    local -A unsupported=(
+        ["lxc"]="LXC"
+        ["openvz"]="OpenVZ"
+        ["docker"]="Docker"
+    )
+    for TYPE in "${!unsupported[@]}"; do
+        if [[ -n "$VIRT" && "$VIRT" =~ "$TYPE" ]] || [[ "$TYPE" == "openvz" && -d "/proc/vz" ]]; then
+            error_and_exit "Virtualization method is ${unsupported[$TYPE]}, which is not supported."
+        fi
+    done
+}
