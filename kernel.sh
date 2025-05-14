@@ -18,33 +18,13 @@ export DEBIAN_FRONTEND=noninteractive
 export PATH=/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:$PATH
 
 # 自定义彩色字体
-_red() {
-    printf "\033[91m%s\033[0m\n" "$*"
-}
-
-_green() {
-    printf "\033[92m%s\033[0m\n" "$*"
-}
-
-_yellow() {
-    printf "\033[93m%s\033[0m\n" "$*"
-}
-
-_err_msg() {
-    printf "\033[41m\033[1mError\033[0m %s\n" "$*"
-}
-
-_suc_msg() {
-    printf "\033[42m\033[1mSuccess\033[0m %s\n" "$*"
-}
-
-_info_msg() {
-    printf "\033[43m\033[1mInfo\033[0m %s\n" "$*"
-}
-
-reading() {
-    read -rep "$(_yellow "$1")" "$*"
-}
+_red() { printf "\033[91m%s\033[0m\n" "$*"; }
+_green() { printf "\033[92m%s\033[0m\n" "$*"; }
+_yellow() { printf "\033[93m%s\033[0m\n" "$*"; }
+_err_msg() { printf "\033[41m\033[1mError\033[0m %s\n" "$*"; }
+_suc_msg() { printf "\033[42m\033[1mSuccess\033[0m %s\n" "$*"; }
+_info_msg() { printf "\033[43m\033[1mInfo\033[0m %s\n" "$*"; }
+reading() { read -rep "$(_yellow "$1")" "$*"; }
 
 # 安全清屏函数
 clear_screen() {
