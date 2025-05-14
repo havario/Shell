@@ -70,7 +70,7 @@ _os_full() {
     [ -z "$OS_NAME" ] && error_and_exit 'This Linux distribution is not supported.'
 }
 
-_os_ver() {
+_os_version() {
     local MAIN_VER
     MAIN_VER="$(printf "%s" "$OS_INFO" | grep -oE "[0-9.]+")"
     printf -- "%s" "${MAIN_VER%%.*}"
