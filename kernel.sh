@@ -49,6 +49,8 @@ _is_alpine() {
 }
 
 _os_full() {
+    local -a RELEASE=("almalinux" "alpine" "centos" "debian" "fedora" "rhel" "rocky" "ubuntu")
+    local -a RELEASE_REGEX=("almalinux" "alpine" "centos" "debian" "fedora" "red hat|rhel" "rocky" "ubuntu")
     if [ -s /etc/os-release ]; then
         OS_INFO="$(grep -i '^PRETTY_NAME=' /etc/os-release | awk -F'=' '{print $NF}' | sed 's#"##g')"
     elif [ -x "$(type -p hostnamectl)" ]; then
@@ -62,8 +64,6 @@ _os_full() {
     elif [ -s /etc/issue ]; then
         OS_INFO="$(grep . /etc/issue | cut -d '\' -f1 | sed '/^[ ]*$/d')"
     fi
-    declare -a RELEASE=("almalinux" "alpine" "centos" "debian" "fedora" "rhel" "rocky" "ubuntu")
-    declare -a RELEASE_REGEX=("almalinux" "alpine" "centos" "debian" "fedora" "red hat|rhel" "rocky" "ubuntu")
     for linux in "${!RELEASE_REGEX[@]}"; do
         [[ "${OS_INFO,,}" =~ "${RELEASE_REGEX[linux]}" ]] && OS_NAME="${RELEASE[linux]}" && break
     done
@@ -78,6 +78,7 @@ _os_version() {
 
 detect_virt() {
     local VIRT
+    local -a UNSUPPORTED=("lxc" "openvz" "docker")
     if _exists "virt-what"; then
         VIRT="$(virt-what)"
     elif _exists "systemd-detect-virt"; then
@@ -85,7 +86,6 @@ detect_virt() {
     else
         error_and_exit 'No virtualization detection tool found.'
     fi
-    declare -a UNSUPPORTED=("lxc" "openvz" "docker")
     for type in "${UNSUPPORTED[@]}"; do
         if [[ "${VIRT,,}" =~ "$type" ]] || [[ "$type" == "openvz" && -d "/proc/vz" ]]; then
             error_and_exit "Virtualization method is $type, which is not supported."
