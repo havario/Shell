@@ -49,7 +49,7 @@ _is_alpine() {
 }
 
 _os_full() {
-    local -a RELEASE=("almalinux" "alpine" "centos" "debian" "fedora" "rhel" "rocky" "ubuntu")
+    local -a RELEASE_DISTROS=("almalinux" "alpine" "centos" "debian" "fedora" "rhel" "rocky" "ubuntu")
     local -a RELEASE_REGEX=("almalinux" "alpine" "centos" "debian" "fedora" "red hat|rhel" "rocky" "ubuntu")
     if [ -s /etc/os-release ]; then
         OS_INFO="$(grep -i '^PRETTY_NAME=' /etc/os-release | awk -F'=' '{print $NF}' | sed 's#"##g')"
@@ -65,7 +65,7 @@ _os_full() {
         OS_INFO="$(grep . /etc/issue | cut -d '\' -f1 | sed '/^[ ]*$/d')"
     fi
     for linux in "${!RELEASE_REGEX[@]}"; do
-        [[ "${OS_INFO,,}" =~ "${RELEASE_REGEX[linux]}" ]] && OS_NAME="${RELEASE[linux]}" && break
+        [[ "${OS_INFO,,}" =~ "${RELEASE_REGEX[linux]}" ]] && OS_NAME="${RELEASE_DISTROS[linux]}" && break
     done
     [ -z "$OS_NAME" ] && error_and_exit 'This Linux distribution is not supported.'
 }
@@ -76,7 +76,7 @@ _os_version() {
     printf -- "%s" "${MAIN_VER%%.*}"
 }
 
-detect_virt() {
+_check_virt() {
     local VIRT
     local -a UNSUPPORTED=("lxc" "openvz" "docker")
     if _is_exists "virt-what"; then
