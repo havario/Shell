@@ -85,14 +85,10 @@ detect_virt() {
     else
         error_and_exit 'No virtualization detection tool found.'
     fi
-    local -A unsupported=(
-        ["lxc"]="LXC"
-        ["openvz"]="OpenVZ"
-        ["docker"]="Docker"
-    )
-    for TYPE in "${!unsupported[@]}"; do
-        if [[ -n "$VIRT" && "$VIRT" =~ "$TYPE" ]] || [[ "$TYPE" == "openvz" && -d "/proc/vz" ]]; then
-            error_and_exit "Virtualization method is ${unsupported[$TYPE]}, which is not supported."
+    declare -a UNSUPPORTED=("lxc" "openvz" "docker")
+    for type in "${UNSUPPORTED[@]}"; do
+        if [[ "${VIRT,,}" =~ "$type" ]] || [[ "$type" == "openvz" && -d "/proc/vz" ]]; then
+            error_and_exit "Virtualization method is $type, which is not supported."
         fi
     done
 }
