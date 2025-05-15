@@ -79,9 +79,9 @@ _os_version() {
 detect_virt() {
     local VIRT
     local -a UNSUPPORTED=("lxc" "openvz" "docker")
-    if _exists "virt-what"; then
+    if _is_exists "virt-what"; then
         VIRT="$(virt-what)"
-    elif _exists "systemd-detect-virt"; then
+    elif _is_exists "systemd-detect-virt"; then
         VIRT="$(systemd-detect-virt)"
     else
         error_and_exit 'No virtualization detection tool found.'
