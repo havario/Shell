@@ -49,8 +49,8 @@ _is_alpine() {
 }
 
 _os_full() {
-    local -a RELEASE_DISTROS=("almalinux" "alpine" "centos" "debian" "fedora" "rhel" "rocky" "ubuntu")
     local -a RELEASE_REGEX=("almalinux" "alpine" "centos" "debian" "fedora" "red hat|rhel" "rocky" "ubuntu")
+    local -a RELEASE_DISTROS=("almalinux" "alpine" "centos" "debian" "fedora" "rhel" "rocky" "ubuntu")
     if [ -s /etc/os-release ]; then
         OS_INFO="$(grep -i '^PRETTY_NAME=' /etc/os-release | awk -F'=' '{print $NF}' | sed 's#"##g')"
     elif [ -x "$(type -p hostnamectl)" ]; then
@@ -64,8 +64,8 @@ _os_full() {
     elif [ -s /etc/issue ]; then
         OS_INFO="$(grep . /etc/issue | cut -d '\' -f1 | sed '/^[ ]*$/d')"
     fi
-    for linux in "${!RELEASE_REGEX[@]}"; do
-        [[ "${OS_INFO,,}" =~ "${RELEASE_REGEX[linux]}" ]] && OS_NAME="${RELEASE_DISTROS[linux]}" && break
+    for release in "${!RELEASE_REGEX[@]}"; do
+        [[ "${OS_INFO,,}" =~ "${RELEASE_REGEX[release]}" ]] && OS_NAME="${RELEASE_DISTROS[release]}" && break
     done
     [ -z "$OS_NAME" ] && error_and_exit 'This Linux distribution is not supported.'
 }
@@ -91,4 +91,23 @@ _check_virt() {
             error_and_exit "Virtualization method is $type, which is not supported."
         fi
     done
+}
+
+_rhel_install() {
+    local OS_VER
+    
+    # 检测系统版本
+    OS_VER="$(rpm -q --qf "%{VERSION}" $(rpm -qf /etc/os-release) 2>/dev/null | awk -F '.' '{print $1}')"
+    # 安装ELRepo仓库
+    case "$OS_VER" in
+        8|9)
+            # 导入ELRepo GPG公钥
+            rpm --import https://www.elrepo.org/RPM-GPG-KEY-elrepo.org
+            yum -y install "https://www.elrepo.org/elrepo-release-$OS_VER.el$OS_VER.elrepo.noarch.rpm"
+        ;;
+        *)
+            error_and_exit 'Unsupported system version.'
+        ;;
+    esac
+    yum -y install --nogpgcheck --enablerepo=elrepo-kernel kernel-ml
 }
