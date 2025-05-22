@@ -36,7 +36,7 @@ _is_exists() {
 }
 
 clear_screen() {
-    ([ -t 1 ] && tput clear 2>/dev/null) || clear
+    ( [ -t 1 ] && tput clear 2>/dev/null ) || clear
 }
 
 pre_check() {
@@ -61,6 +61,12 @@ os_check() {
     else
         OS_TYPE="$(uname -s 2>/dev/null | sed 's/[A-Z]/\L&/g')"
     fi
+}
+
+before_run() {
+    [ -f "$HOME/unlock-test" ] && rm -f "$HOME/unlock-test" >/dev/null 2>&1
+    [ -f /usr/bin/unlock-test ] && rm -f /usr/bin/unlock-test >/dev/null 2>&1
+    [ -f /usr/local/bin/unlock-test ] && rm -f /usr/local/bin/unlock-test >/dev/null 2>&1
 }
 
 mediaunlock_install() {
@@ -97,28 +103,23 @@ mediaunlock_install() {
     esac
 
     _info_msg "$(_yellow "Downloading MediaUnlockTest Please wait.")"
-    curl -fsL "${GITHUB_PROXY}https://github.com/HsukqiLee/MediaUnlockTest/releases/download/v${VERSION}/unlock-test_${OS_TYPE}_${OS_ARCH}" -o ./unlock-test
-    chmod +x ./unlock-test
-    if ./unlock-test -v >/dev/null 2>&1; then
+    curl -fsL "${GITHUB_PROXY}https://github.com/HsukqiLee/MediaUnlockTest/releases/download/v${VERSION}/unlock-test_${OS_TYPE}_${OS_ARCH}" -o /usr/local/bin/unlock-test
+    chmod +x /usr/local/bin/unlock-test
+    if unlock-test -v >/dev/null 2>&1; then
         _suc_msg "$(_green "MediaUnlockTest Installed Successfully!")"
     else
         _err_msg "$(_red "MediaUnlockTest Installed fail.")"; exit 1
     fi
-}
-
-after_run() {
-    [ -f "$HOME/unlock-test" ] && rm -f "$HOME/unlock-test" >/dev/null 2>&1
-    [ -f /usr/bin/unlock-test ] && rm -f /usr/bin/unlock-test >/dev/null 2>&1
-    [ -f /usr/local/bin/unlock-test ] && rm -f /usr/local/bin/unlock-test >/dev/null 2>&1
+    clear_screen
 }
 
 MediaUnlockTest() {
     clear_screen
     pre_check
     os_check
+    before_run
     mediaunlock_install
-    ./unlock-test "$@"
-    after_run
+    unlock-test "$@"
 }
 
 MediaUnlockTest "$@"
